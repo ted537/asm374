@@ -1,0 +1,22 @@
+{
+  "name": "asm374",
+  "version": "1.0.0",
+  "description": "assembler for a simple RISC2 programming language",
+  "main": "asm374.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ted537/asm374.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ted537/asm374/issues"
+  },
+  "homepage": "https://github.com/ted537/asm374#readme",
+  "dependencies": {
+    "@types/node": "^13.9.1"
+  }
+}
