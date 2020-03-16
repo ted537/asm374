@@ -110,6 +110,10 @@ function assembleInstruction(instruction:instruction):field[] {
             const ra = fieldFromRegister(params[1]);
             fields.push(ra);
             fields.push(rb);
+            fields.push({
+                bits:19,
+                value:0
+            })
             return fields;
         }
         // three registers ALU
@@ -120,6 +124,10 @@ function assembleInstruction(instruction:instruction):field[] {
             fields.push(ra);
             fields.push(rb);
             fields.push(rc);
+            fields.push({
+                bits:15,
+                value:0
+            })
             return fields;
         }
         case 'addi':case 'andi': case 'ori': {
@@ -140,6 +148,10 @@ function assembleInstruction(instruction:instruction):field[] {
             const rb = fieldFromRegister(params[1]);
             fields.push(ra);
             fields.push(rb);
+            fields.push({
+                bits:19,
+                value:0
+            })
             return fields;
         }
         // branch
@@ -148,16 +160,30 @@ function assembleInstruction(instruction:instruction):field[] {
             fields.push({bits:4,value:0})
             const br_val = BR_TABLE[op]
             fields.push({bits:2,value:br_val})
+
+            const immediateField = {
+                bits:19,
+                value:Number.parseInt(params[0])
+            };
+            fields.push(immediateField);
+
             return fields;
         // one register
         case 'jr': case 'jal': case 'in': case 'out': case 'mfhi': case 'mflo':{
             const ra = fieldFromRegister(params[0]);
             fields.push(ra);
+            fields.push({
+                bits:23,
+                value:0
+            })
             return fields;
         }
         // simple
         case 'nop':case 'halt':
-            // nothing to do here
+            // pad rest of instruction
+            fields.push({
+                bits:27,value:0
+            })
             return fields;
         default:
             console.warn(`Unrecognized opcode: ${instruction.op}`);
@@ -193,6 +219,13 @@ function main() {
     for (let i=0;i<lines.length;++i) {
         console.log(lines[i]);
         console.log(assembled[i]);
+        let bitSum  = 0;
+        for (const field of assembled[i]) {
+            bitSum+=field.bits
+        }
+        if (bitSum!==32) {
+            console.error("wrong number of bits");
+        }
     }
 }
 
