@@ -89,15 +89,30 @@ function assembleInstruction(instruction:instruction):field[] {
         value:OP_TABLE[instruction.op]
     }]
     switch(op) {
+        // load
         case 'ld': case 'ldi':{
             const ra = fieldFromRegister(params[0]);
             fields.push(ra);
             const address = parseAddress(params[1]);
             const rb = address.regField;
             fields.push(rb);
-            const c = address.immediateOffset;
+            const immediateField = {
+                bits:19,
+                value:address.immediateOffset
+            }
+            fields.push(immediateField);
             return fields;
         }
+        // store
+        case 'st':{
+            const storeAddress = parseAddress(params[0]);
+            const rb = storeAddress.regField;
+            const ra = fieldFromRegister(params[1]);
+            fields.push(ra);
+            fields.push(rb);
+            return fields;
+        }
+        // three registers ALU
         case 'add': case 'sub': case 'and': case 'or': case 'shr': case 'shl': case 'ror': case 'rol': {
             const ra = fieldFromRegister(params[0]);
             const rb = fieldFromRegister(params[1]);
@@ -107,6 +122,19 @@ function assembleInstruction(instruction:instruction):field[] {
             fields.push(rc);
             return fields;
         }
+        case 'addi':case 'andi': case 'ori': {
+            const ra = fieldFromRegister(params[0]);
+            const rb = fieldFromRegister(params[1]);
+            const c = {
+                bits:19,
+                value:Number.parseInt(params[2])
+            }
+            fields.push(ra);
+            fields.push(rb);
+            fields.push(c);
+            return fields;
+        }
+        // two registers ALU
         case 'mul': case 'div': case 'neg': case 'not': {
             const ra = fieldFromRegister(params[0]);
             const rb = fieldFromRegister(params[1]);
@@ -114,12 +142,20 @@ function assembleInstruction(instruction:instruction):field[] {
             fields.push(rb);
             return fields;
         }
+        // branch
         case 'brmi': case 'brpl': case 'brzr': case 'brnz':
             // pad with dont cares
             fields.push({bits:4,value:0})
             const br_val = BR_TABLE[op]
             fields.push({bits:2,value:br_val})
             return fields;
+        // one register
+        case 'jr': case 'jal': case 'in': case 'out': case 'mfhi': case 'mflo':{
+            const ra = fieldFromRegister(params[0]);
+            fields.push(ra);
+            return fields;
+        }
+        // simple
         case 'nop':case 'halt':
             // nothing to do here
             return fields;
