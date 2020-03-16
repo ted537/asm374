@@ -4,7 +4,9 @@
   "description": "assembler for a simple RISC2 programming language",
   "main": "asm374.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node asm374.js",
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
