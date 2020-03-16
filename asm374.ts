@@ -89,7 +89,7 @@ function assembleInstruction(instruction:instruction):field[] {
         value:OP_TABLE[instruction.op]
     }]
     switch(op) {
-        case 'ld': case 'ldi':
+        case 'ld': case 'ldi':{
             const ra = fieldFromRegister(params[0]);
             fields.push(ra);
             const address = parseAddress(params[1]);
@@ -97,6 +97,23 @@ function assembleInstruction(instruction:instruction):field[] {
             fields.push(rb);
             const c = address.immediateOffset;
             return fields;
+        }
+        case 'add': case 'sub': case 'and': case 'or': case 'shr': case 'shl': case 'ror': case 'rol': {
+            const ra = fieldFromRegister(params[0]);
+            const rb = fieldFromRegister(params[1]);
+            const rc = fieldFromRegister(params[2]);
+            fields.push(ra);
+            fields.push(rb);
+            fields.push(rc);
+            return fields;
+        }
+        case 'mul': case 'div': case 'neg': case 'not': {
+            const ra = fieldFromRegister(params[0]);
+            const rb = fieldFromRegister(params[1]);
+            fields.push(ra);
+            fields.push(rb);
+            return fields;
+        }
         case 'brmi': case 'brpl': case 'brzr': case 'brnz':
             // pad with dont cares
             fields.push({bits:4,value:0})
