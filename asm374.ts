@@ -226,7 +226,6 @@ function bitsToNumber(fields_des:field[]) {
     let i=0;
     let num = 0;
     for (const field of fields_asc) {
-        // TODO figure out how to deal iwth negatives 
         let unsigned_val:number;
         if (field.value>=0) {
             unsigned_val = field.value;
@@ -241,23 +240,27 @@ function bitsToNumber(fields_des:field[]) {
     return num;
 }
 
+function separateBits(bitString:string):string {
+    return [
+        bitString.substr(0,5),
+        bitString.substr(5,4),
+        bitString.substr(9,4),
+        bitString.substr(13,4),
+        bitString.substr(17)
+    ].join(' ');
+}
+
 function main() {
     const buff = readFileSync('./program_part1.asm')
     const lines = buff.toString().split("\n")
     const instructions = lines.map(parseInstruction);
     const assembled = instructions.map(assembleInstruction);
     const compiled = assembled.map(bitsToNumber);
+    console.log('INSTRUCTION'.padEnd(40) + '  OP   RA   RB   RC   IMMEDIATE'.padEnd(36).padStart(40))
     for (let i=0;i<lines.length;++i) {
-        console.log(lines[i]);
-        console.log(assembled[i]);
-        console.log(compiled[i]);
-        let bitSum  = 0;
-        for (const field of assembled[i]) {
-            bitSum+=field.bits
-        }
-        if (bitSum!==32) {
-            console.error("wrong number of bits");
-        }
+        const commentIndex = lines[i].indexOf(';');
+        const lineNoComment = commentIndex===-1 ? lines[i] : lines[i].substr(0,commentIndex);
+        console.log(lineNoComment.padEnd(40)+separateBits(compiled[i].toString(2).padStart(32,'0')).padStart(40));
     }
 }
 
