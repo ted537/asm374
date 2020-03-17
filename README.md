@@ -1,2 +1,2 @@
 # asm374
-assembler for a simple RISC2 programming language 
+assembler for a simple RISC programming language 
