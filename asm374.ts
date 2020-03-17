@@ -163,9 +163,7 @@ function assembleInstruction(instruction:instruction):field[] {
             return fields;
         }
         // branch
-        // TODO need to use register
         case 'brmi': case 'brpl': case 'brzr': case 'brnz':
-            // pad with dont cares
             const ra = fieldFromRegister(params[0]);
             fields.push(ra);
             const br_val = BR_TABLE[op]
@@ -223,14 +221,36 @@ function parseInstruction(line:string):instruction {
     }
 }
 
+function bitsToNumber(fields_des:field[]) {
+    const fields_asc = [...fields_des].reverse();
+    let i=0;
+    let num = 0;
+    for (const field of fields_asc) {
+        // TODO figure out how to deal iwth negatives 
+        let unsigned_val:number;
+        if (field.value>=0) {
+            unsigned_val = field.value;
+        }
+        else {
+            unsigned_val = Math.pow(2,field.bits) + field.value
+        }
+        const shifted_val = unsigned_val * Math.pow(2,i);
+        num += shifted_val;
+        i+=field.bits;
+    }
+    return num;
+}
+
 function main() {
     const buff = readFileSync('./program_part1.asm')
     const lines = buff.toString().split("\n")
     const instructions = lines.map(parseInstruction);
     const assembled = instructions.map(assembleInstruction);
+    const compiled = assembled.map(bitsToNumber);
     for (let i=0;i<lines.length;++i) {
         console.log(lines[i]);
         console.log(assembled[i]);
+        console.log(compiled[i]);
         let bitSum  = 0;
         for (const field of assembled[i]) {
             bitSum+=field.bits
