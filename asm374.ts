@@ -15,10 +15,19 @@ interface field {
     value:number
 }
 
+function parseImmediate(str:string):number {
+    if (str[0]=='$') {
+        return Number.parseInt(str.substr(1),16);
+    }
+    else {
+        return Number.parseInt(str,10);
+    }
+}
+
 function parseAddress(param:string):address {
     // this is an immediate address
     if (param.includes("(")) {
-        const immediateOffset = Number.parseInt(param);
+        const immediateOffset = parseImmediate(param);
         const startIndex = param.indexOf("(")+1;
         const stopIndex = param.indexOf(")");
         const length = stopIndex-startIndex;
@@ -26,8 +35,7 @@ function parseAddress(param:string):address {
         return {regField,immediateOffset}
     }
     else {
-        const parseFrom = param.startsWith('$') ? param.substr(1) : param
-        const immediateOffset = Number.parseInt(parseFrom)
+        const immediateOffset = parseImmediate(param);
         return {
             regField:{
                 bits:4,
@@ -112,7 +120,7 @@ function assembleInstruction(instruction:instruction):field[] {
             fields.push(rb);
             fields.push({
                 bits:19,
-                value:0
+                value:storeAddress.immediateOffset
             })
             return fields;
         }
@@ -135,7 +143,7 @@ function assembleInstruction(instruction:instruction):field[] {
             const rb = fieldFromRegister(params[1]);
             const c = {
                 bits:19,
-                value:Number.parseInt(params[2])
+                value:parseImmediate(params[2])
             }
             fields.push(ra);
             fields.push(rb);
@@ -155,15 +163,20 @@ function assembleInstruction(instruction:instruction):field[] {
             return fields;
         }
         // branch
+        // TODO need to use register
         case 'brmi': case 'brpl': case 'brzr': case 'brnz':
             // pad with dont cares
-            fields.push({bits:4,value:0})
+            const ra = fieldFromRegister(params[0]);
+            fields.push(ra);
             const br_val = BR_TABLE[op]
             fields.push({bits:2,value:br_val})
 
+            // 2 padding bits
+            fields.push({bits:2,value:0});
+
             const immediateField = {
                 bits:19,
-                value:Number.parseInt(params[0])
+                value:parseImmediate(params[1])
             };
             fields.push(immediateField);
 
@@ -190,7 +203,6 @@ function assembleInstruction(instruction:instruction):field[] {
     }
     return [];
 }
-
 
 function parseInstruction(line:string):instruction {
     const startIndex = line.includes(':') ? line.indexOf(':')+1 : 0;
