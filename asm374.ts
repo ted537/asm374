@@ -251,7 +251,13 @@ function separateBits(bitString:string):string {
 }
 
 function main() {
-    const buff = readFileSync('./program_part1.asm')
+    const filename = process.argv[2];
+    if (!filename) {
+        console.log("NO ASM FILE SPECIFIED! exiting...");
+        return;
+    }
+    const startAt = Number.parseInt(process.argv[3]) || 0;
+    const buff = readFileSync(filename);
     const lines = buff.toString().split("\n")
     const instructions = lines.map(parseInstruction);
     const assembled = instructions.map(assembleInstruction);
@@ -262,6 +268,8 @@ function main() {
         const lineNoComment = commentIndex===-1 ? lines[i] : lines[i].substr(0,commentIndex);
         console.log(lineNoComment.padEnd(40)+separateBits(compiled[i].toString(2).padStart(32,'0')).padStart(40));
     }
+    console.log("COMPILED");
+    compiled.forEach((machine_inst,i) => console.log(startAt+i+" "+machine_inst));
 }
 
 main();
