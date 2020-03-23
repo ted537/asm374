@@ -167,10 +167,8 @@ function assembleInstruction(instruction:instruction):field[] {
             const ra = fieldFromRegister(params[0]);
             fields.push(ra);
             const br_val = BR_TABLE[op]
-            fields.push({bits:2,value:br_val})
-
-            // 2 padding bits
-            fields.push({bits:2,value:0});
+            // determines type of branch condition
+            fields.push({bits:4,value:br_val})
 
             const immediateField = {
                 bits:19,
